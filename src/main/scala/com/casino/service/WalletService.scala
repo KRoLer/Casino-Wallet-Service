@@ -1,19 +1,22 @@
 package com.casino.service
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
-import com.casino.actors.WalletActor
 import com.casino.actors.WalletActor._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+trait WalletService {
+  def register(id: Long): Future[Either[String, Double]]
+  def balance(id: Long): Future[Either[String, Double]]
+  def deposit(playerId: Long, balance: Option[Double]): Future[Either[String, Double]]
+  def withdraw(playerId: Long, balance: Option[Double]): Future[Either[Double, Double]]
+}
 
-object WalletService {
+class ActorWalletService (wallet:ActorRef) extends WalletService {
 
-  val system: ActorSystem = ActorSystem("wallet-system")
-  val wallet: ActorRef = system.actorOf(WalletActor.props)
   implicit val timeout = Timeout(5 seconds)
 
   def register(id: Long): Future[Either[String, Double]] =
