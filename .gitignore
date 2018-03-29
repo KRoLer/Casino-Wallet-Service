@@ -17,5 +17,5 @@ project/plugins/project/
 .lib/
 
 .idea/
-project/
-src/main/scala/com/casino/Test.sc
+*.sc
+

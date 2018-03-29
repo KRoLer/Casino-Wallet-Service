@@ -1,8 +1,14 @@
+enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
+
 name := "Wallet-webservice"
 
 version := "0.1"
 
 scalaVersion := "2.12.5"
+
+
+mainClass in Compile := Some("com.casino.WalletWebservice")
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.5.11",
