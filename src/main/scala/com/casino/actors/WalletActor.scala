@@ -43,7 +43,7 @@ class WalletActor extends Actor with ActorLogging {
         sender ! Right(newBalance)
       } else {
         log.info(s"User $id try withdraw $amount. Insufficient balance: $balance")
-        sender ! Left(balance)
+        sender ! Left(("Insufficient balance", balance))
       }
     }
     case _ => {

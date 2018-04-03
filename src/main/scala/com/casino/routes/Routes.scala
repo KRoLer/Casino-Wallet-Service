@@ -18,6 +18,7 @@ trait Protocols extends SprayJsonSupport with DefaultJsonProtocol {
 }
 
 class UnsecuredRoutes (service: WalletService) extends Protocols {
+  import service.{BalanceError, UserError}
 
   def routes: Route = logRequestResult("casino-wallet-microservice") {
     pathPrefix("api" / "v1") {
@@ -25,7 +26,8 @@ class UnsecuredRoutes (service: WalletService) extends Protocols {
         get {
           onComplete(service.balance(playerId)) {
             case Success(Right(balance)) => complete(StatusCodes.OK -> Balance(balance))
-            case Success(Left(error)) => complete(StatusCodes.BadRequest -> error)
+            case Success(Left(UserError(msg))) => complete(StatusCodes.BadRequest -> msg)
+
             case Failure(error) => complete(StatusCodes.InternalServerError -> error)
           }
         }
@@ -34,7 +36,8 @@ class UnsecuredRoutes (service: WalletService) extends Protocols {
           (post & entity(as[User])) { user =>
             onComplete(service.register(user.playerId)) {
               case Success(Right(balance)) => complete(StatusCodes.OK -> Balance(balance))
-              case Success(Left(error)) => complete(StatusCodes.BadRequest -> error)
+              case Success(Left(UserError(msg))) => complete(StatusCodes.BadRequest -> msg)
+
               case Failure(error) => complete(StatusCodes.InternalServerError -> error)
             }
           }
@@ -43,7 +46,9 @@ class UnsecuredRoutes (service: WalletService) extends Protocols {
           (post & entity(as[User])) { user =>
             onComplete(service.deposit(user.playerId, user.amount)) {
               case Success(Right(balance)) => complete(StatusCodes.OK -> Balance(balance))
-              case Success(Left(error)) => complete(StatusCodes.BadRequest -> error)
+              case Success(Left(UserError(msg))) => complete(StatusCodes.BadRequest -> msg)
+
+              case Failure(error:IllegalArgumentException) => complete(StatusCodes.BadRequest -> error.getMessage)
               case Failure(error) => complete(StatusCodes.InternalServerError -> error)
             }
           }
@@ -52,8 +57,11 @@ class UnsecuredRoutes (service: WalletService) extends Protocols {
           (post & entity(as[User])) { user =>
             onComplete(service.withdraw(user.playerId, user.amount)) {
               case Success(Right(balance)) => complete(StatusCodes.OK -> Balance(balance))
-              case Success(Left(balance)) => complete(StatusCodes.BadRequest -> Balance(balance))
-              case Failure(error) => complete(StatusCodes.InternalServerError -> error)
+              case Success(Left(BalanceError(_, Some(balance)))) => complete(StatusCodes.BadRequest -> Balance(balance))
+              case Success(Left(UserError(msg))) => complete(StatusCodes.BadRequest -> msg)
+
+              case Failure(error:IllegalArgumentException) => complete(StatusCodes.BadRequest -> error.getMessage)
+              case Failure(error) => complete(StatusCodes.InternalServerError -> error.getMessage)
             }
           }
         }
