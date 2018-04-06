@@ -27,9 +27,10 @@ class WalletActor extends PersistentActor with ActorLogging {
     case Register(id) => {
       log.info(s"User with id: $id has been registered!")
 
+      val requester = sender
       persist(Registered(id, 0.0))(evt => {
         updateState(evt)
-        sender() ! Right(state(id))
+        requester ! Right(state(id))
       })
     }
     case Balance(id) if state.contains(id) => {
@@ -41,20 +42,22 @@ class WalletActor extends PersistentActor with ActorLogging {
       log.info(s"Deposit for user: $id with amount $amount")
       val newBalance = state(id) + amount
 
+      val requester = sender
       persist(Deposited(id, newBalance))(evt => {
         updateState(evt)
-        sender() ! Right(newBalance)
+        requester ! Right(newBalance)
       })
     }
     case Withdraw(id, amount) if state.contains(id) => {
       val balance = state(id)
       val newBalance = balance - amount
 
+      val requester = sender
       if (newBalance >= 0) {
         log.info(s"User $id withdraw $amount and new balance is: $newBalance")
         persist(Withdrawn(id, newBalance))(evt => {
           updateState(evt)
-          sender ! Right(newBalance)
+          requester ! Right(newBalance)
         })
       } else {
         log.info(s"User $id try withdraw $amount. Insufficient balance: $balance")
