@@ -1,5 +1,3 @@
-
-
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
 

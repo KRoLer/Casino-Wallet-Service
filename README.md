@@ -20,10 +20,14 @@ The best way to run this webservice is to build and run docker image.
 
 ### Installation
 * Validate docker installation or install it ([Download here](https://www.docker.com/community-edition))
+* Create docker network: `docker network create casino`
 * Download Cassandra image using docker: `docker pull cassandra`   
-* Run cassandra container with alias name _cassandra_db_: `docker run --name cassandra_db cassandra:latest`
-* Clone this repository, navigate to the root folder and run: `sbt docker:publishLocal`
-* Run newly created image: `docker run -p "8080:8080" --name wallet --link cassandra_db:cassandra wallet-webservice:0.1`
+* Run cassandra container with alias name _cassandra_db_: `docker run --name cassandra_db -d --net casino cassandra:latest`
+* Clone this repository: `git clone https://github.com/KRoLer/Casino-Wallet-Service.git`
+* Navigate to the root folder `cd Casino-Wallet-Service` and run: `sbt docker:publishLocal`
+* Run newly created image: `docker run -p "8080:8080" -d --rm --name walletservice --net casino wallet-webservice:0.1`
+
+* To stop both containers use: `docker stop walletservice cassandra_db`
 
 ### Validation
 To validate this service locally we recommend to use [Postman](https://www.getpostman.com/apps).
