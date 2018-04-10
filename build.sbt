@@ -1,11 +1,14 @@
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
+enablePlugins(AshScriptPlugin)
 
 name := "Wallet-webservice"
 
 version := "0.1"
 
 scalaVersion := "2.12.5"
+
+dockerBaseImage := "openjdk:jre-alpine"
 
 mainClass in Compile := Some("com.casino.WalletWebservice")
 
